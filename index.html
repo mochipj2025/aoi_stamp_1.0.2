@@ -9,15 +9,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* 大人リッチなカラーパレット */
-            --primary: #d48b96;       /* くすみピンク */
-            --accent: #c5a065;        /* シャンパンゴールド */
-            --text-main: #5a4a42;     /* 柔らかいブラウン */
+            --primary: #d48b96;
+            --accent: #c5a065;
+            --text-main: #5a4a42;
             --bg-start: #fdfbf7;
             --bg-end: #fff0f0;
             --card-bg: rgba(255, 255, 255, 0.85);
         }
 
+        /* 全体の設定 */
         body {
             font-family: 'Zen Maru Gothic', sans-serif;
             background: linear-gradient(180deg, var(--bg-start) 0%, var(--bg-end) 100%);
@@ -26,16 +26,22 @@
             padding: 0;
             line-height: 1.8;
             letter-spacing: 0.05em;
+            /* 横スクロール防止 */
+            overflow-x: hidden; 
+            width: 100%;
         }
 
+        /* メインコンテナ（レスポンシブの要） */
         .container {
-            max-width: 600px;
+            width: 100%;
+            max-width: 600px; /* PCでもスマホ幅を維持して見やすく */
             margin: 0 auto;
             background-color: transparent;
             padding-bottom: 80px;
+            box-sizing: border-box; /* パディングを含めた幅計算 */
         }
 
-        /* ヒーローエリア（画像表示） */
+        /* ヒーローエリア */
         .hero-section {
             position: relative;
             padding: 20px;
@@ -43,11 +49,10 @@
             border-bottom-left-radius: 40px;
             border-bottom-right-radius: 40px;
             box-shadow: 0 10px 30px rgba(212, 139, 150, 0.15);
-            margin-bottom: 40px;
+            margin-bottom: 0;
             overflow: hidden;
         }
         
-        /* 予告用のバッジ */
         .status-badge {
             position: absolute;
             top: 30px;
@@ -61,23 +66,55 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             z-index: 10;
             letter-spacing: 0.1em;
+            pointer-events: none; /* クリックの邪魔をしない */
         }
         
         .hero-img {
             width: 100%;
+            height: auto;
             border-radius: 20px;
             display: block;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
 
-        /* テキストエリア共通 */
+        /* 音楽プレーヤーエリア */
+        .audio-player-area {
+            text-align: center;
+            margin: 30px auto 40px;
+            position: relative;
+            z-index: 5;
+            width: 90%; /* スマホで端が切れないように */
+            max-width: 500px;
+            background: #fff;
+            padding: 15px 20px;
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(212, 139, 150, 0.2);
+            border: 2px solid var(--primary);
+            box-sizing: border-box;
+        }
+        
+        .audio-label {
+            font-size: 0.8rem;
+            color: var(--primary);
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+        audio {
+            width: 100%;
+            height: 35px;
+            border-radius: 20px;
+            outline: none;
+        }
+
+        /* コンテンツエリア */
         .content-area {
             padding: 0 25px;
             text-align: center;
         }
 
         h2 {
-            font-size: 1.2rem;
+            font-size: clamp(1.1rem, 4vw, 1.3rem); /* 画面幅に合わせて文字サイズを自動調整 */
             color: var(--primary);
             margin-bottom: 25px;
             position: relative;
@@ -96,6 +133,7 @@
         p {
             font-size: 0.95rem;
             margin-bottom: 30px;
+            word-wrap: break-word; /* 長い文字の折り返し */
         }
 
         /* プロフィールカード */
@@ -148,6 +186,11 @@
             font-size: 0.9rem;
             box-shadow: 0 4px 15px rgba(220, 39, 67, 0.3);
             transition: transform 0.2s;
+            /* ボタンのテキスト折り返し防止 */
+            white-space: nowrap; 
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .btn-instagram:hover {
             transform: translateY(-2px);
@@ -164,14 +207,114 @@
             gap: 12px;
             opacity: 0.8;
         }
+        
+        /* スマホ対応のメディアクエリ（画面幅400px以下） */
+        @media screen and (max-width: 400px) {
+            .stamp-grid {
+                gap: 8px; /* 隙間を詰める */
+            }
+            .content-area {
+                padding: 0 15px; /* 余白を詰める */
+            }
+            .profile-card {
+                padding: 25px 15px;
+                margin: 40px 15px;
+            }
+            h2 {
+                font-size: 1.1rem;
+            }
+        }
+
         .stamp-grid img {
             width: 100%;
+            height: auto;
             border-radius: 12px;
             background-color: #fff;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: transform 0.2s;
+            /* タップ時のハイライトを消す（スマホ用） */
+            -webkit-tap-highlight-color: transparent;
+        }
+        .stamp-grid img:hover {
+            transform: scale(1.05);
         }
 
-        /* フッター */
+        /* 拡大モーダル（レスポンシブ対応） */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal.active {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .modal-content {
+            position: relative;
+            /* 画面幅の90% か 最大400px か、小さい方を選ぶ */
+            width: min(90%, 400px); 
+            background-color: #fff;
+            border: 4px solid var(--accent);
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 0 50px rgba(197, 160, 101, 0.6);
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .modal-content img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: -50px;
+            right: -10px;
+            color: #fff;
+            font-size: 35px;
+            cursor: pointer;
+            background: rgba(0,0,0,0.5);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--accent);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: sans-serif;
+            transition: transform 0.2s;
+            /* タップ領域確保 */
+            touch-action: manipulation;
+        }
+        .close-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .close-hint {
+            position: absolute;
+            bottom: -40px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
         footer {
             margin-top: 60px;
             font-size: 0.75rem;
@@ -195,6 +338,11 @@
             <div class="status-badge">COMING SOON</div>
             <img src="img/hero.png" alt="MINIあおい爆誕" class="hero-img">
         </header>
+
+        <div class="audio-player-area">
+            <span class="audio-label">♪ テーマソング：ミニあおい爆誕</span>
+            <audio controls src="img/theme_song.mp3"></audio>
+        </div>
 
         <section class="content-area">
             <h2>いつも、あおいを応援してくださり<br>ありがとうございます！</h2>
@@ -243,7 +391,7 @@
                 <img src="img/stamp/13.png"><img src="img/stamp/14.png"><img src="img/stamp/15.png"><img src="img/stamp/16.png">
             </div>
             <p style="text-align: center; font-size: 0.8rem; color: #999; margin-top: 20px;">
-                ※開発中の画面です。
+                ※タップして拡大できます
             </p>
         </section>
 
@@ -252,6 +400,38 @@
         </footer>
 
     </div>
+
+    <div id="image-modal" class="modal">
+        <div class="modal-content">
+            <button class="close-btn">×</button>
+            <img src="" alt="拡大画像" id="modal-img">
+            <div class="close-hint">背景をタップして閉じる</div>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('image-modal');
+        const modalImg = document.getElementById('modal-img');
+        const stamps = document.querySelectorAll('.stamp-grid img');
+        const closeBtn = document.querySelector('.close-btn');
+
+        stamps.forEach(stamp => {
+            stamp.addEventListener('click', () => {
+                modalImg.src = stamp.src;
+                modal.classList.add('active');
+            });
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target !== modalImg) {
+                modal.classList.remove('active');
+            }
+        });
+        
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+    </script>
 
 </body>
 </html>
